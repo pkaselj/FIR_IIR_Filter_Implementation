@@ -60,8 +60,8 @@ void CalculateResponse_IIR(
             i,
             fY,
             fX,
-            fCoefficientsX, iN_CoefficientsX,
-            fCoefficientsY, iN_CoefficientsY
+            fCoeffX, iNCoeffX,
+            fCoeffY, iNCoeffY
         );
 
         fY[i] = fValue;
