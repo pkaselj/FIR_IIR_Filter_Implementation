@@ -1,13 +1,13 @@
-const int iN_CoefficientsX = 17;
-const double fCoefficientsX[17] = {
+const int N_FeedforwardCoefficients = 17;
+const double pFeedforwardCoefficients[17] = {
   -0.0009190982084683,                -0, 0.007352785667746,                -0,
    -0.02573474983711,                -0,  0.05146949967422,                -0,
    -0.06433687459278,                -0,  0.05146949967422,                -0,
    -0.02573474983711,                -0, 0.007352785667746,                -0,
   -0.0009190982084683
 };
-const int iN_CoefficientsY = 17;
-const double fCoefficientsY[17] = {
+const int N_FeedbackCoefficients = 17;
+const double pFeedbackCoefficients[17] = {
                    1,   -5.853979238754,    17.74455633912,   -34.98220329678,
       49.23117421393,    -51.2554057676,    39.97375559409,   -23.06186918408,
       9.496947978279,   -2.543204814244,   0.3526165781816,                 0,

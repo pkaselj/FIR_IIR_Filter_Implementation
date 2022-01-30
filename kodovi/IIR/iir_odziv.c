@@ -5,36 +5,37 @@
 
 #include "common\common.h"
 
-extern const int iN_CoefficientsY;
-extern const double fCoefficientsY[];
-extern const int iN_CoefficientsX;
-extern const double fCoefficientsX[];
+extern const int    N_FeedforwardCoefficients;
+extern const double pFeedforwardCoefficients[];
+extern const int    N_FeedbackCoefficients;
+extern const double pFeedbackCoefficients[];
 
-double CaluclateResponseSample_IIR(
+
+double CalculateResponseSample_IIR(
     IN        int     iSample,
-    IN  const double  fY[],
-    IN  const double  fX[],
-    IN  const double  fCoeffX[],
-    IN        int     iNCoeffX,
-    IN  const double  fCoeffY[],
-    IN        int     iNCoeffY
+    IN  const double  pOutputBuffer[],
+    IN  const double  pInputBuffer[],
+    IN  const double  pFeedforwardCoefficients[],
+    IN        int     N_FeedforwardCoefficients,
+    IN  const double  pFeedbackCoefficients[],
+    IN        int     N_FeedbackCoefficients
 )
 {
     int i;
 
     double fSum = 0;
 
-    int iNAvailableCoeffX = (iSample >= iNCoeffX) ? iNCoeffX : iSample + 1;
-    int iNAvailableCoeffY = (iSample >= iNCoeffY) ? iNCoeffY : iSample + 1;
+    int N_AvailableFeedforwardCoefficents    = (iSample >= N_FeedforwardCoefficients)   ? N_FeedforwardCoefficients  : iSample + 1;
+    int N_AvailableFeedbackCoefficients      = (iSample >= N_FeedbackCoefficients)      ? N_FeedbackCoefficients     : iSample + 1;
 
-    for (i = 0; i < iNAvailableCoeffX; i++)
+    for (i = 0; i < N_AvailableFeedforwardCoefficents; i++)
     {
-        fSum += fCoeffX[i] * fX[iSample - i];
+        fSum += pFeedforwardCoefficients[i] * pInputBuffer[iSample - i];
     }
 
-    for (i = 1; i < iNAvailableCoeffY; i++)
+    for (i = 1; i < N_AvailableFeedbackCoefficients; i++)
     {
-        fSum -= fCoeffY[i] * fY[iSample - i];
+        fSum -= pFeedbackCoefficients[i] * pOutputBuffer[iSample - i];
     }
 
     return fSum;
@@ -42,66 +43,66 @@ double CaluclateResponseSample_IIR(
 }
 
 void CalculateResponse_IIR(
-    OUT       double  fY[],
-    IN  const double  fX[],
-    IN        int     iNX,
-    IN  const double  fCoeffX[],
-    IN        int     iNCoeffX,
-    IN  const double  fCoeffY[],
-    IN        int     iNCoeffY
+    OUT       double  pOutputBuffer[],
+    IN  const double  pInputBuffer[],
+    IN        int     N_InputSamples,
+    IN  const double  pFeedforwardCoefficients[],
+    IN        int     N_FeedforwardCoefficients,
+    IN  const double  pFeedbackCoefficients[],
+    IN        int     N_FeedbackCoefficients
 )
 {
-    double fValue = 0;
+    double currentSampleValue = 0;
     int i;
 
-    for (i = 0; i < iNX; i++)
+    for (i = 0; i < N_InputSamples; i++)
     {
-        fValue = CaluclateResponseSample_IIR(
+        currentSampleValue = CalculateResponseSample_IIR(
             i,
-            fY,
-            fX,
-            fCoeffX, iNCoeffX,
-            fCoeffY, iNCoeffY
+            pOutputBuffer,
+            pInputBuffer,
+            pFeedforwardCoefficients,   N_FeedforwardCoefficients,
+            pFeedbackCoefficients,      N_FeedbackCoefficients
         );
 
-        fY[i] = fValue;
+        pOutputBuffer[i] = currentSampleValue;
     }
 }
 
 int main(void)
 {
-    const char szOutputFileName_ImpulseResponse[] = "rezultati\\IIR_ImpulseResponse.txt";
-    const char szOutputFileName_StepResponse[]    = "rezultati\\IIR_StepResponse.txt";
+    const char outputFileName_ImpulseResponse[] = "rezultati\\IIR_ImpulseResponse.txt";
+    const char outputFileName_StepResponse[]    = "rezultati\\IIR_StepResponse.txt";
 
-    double fImpulseX[N_BUFFER]  = { 0 };
-    double fStep[N_BUFFER]      = { 0 };
-    double fBuffer[N_BUFFER]    = { 0 };
+    double pImpulseX[N_BUFFER]  = { 0 };
+    double pStepX[N_BUFFER]     = { 0 };
+    double pBuffer[N_BUFFER]    = { 0 };
 
-    const double fStepAmplitude = 1.0f;
+    const double stepAmplitude = 1.0f;
 
-    TransformToImpulse  ( fImpulseX,  N_BUFFER                  );
-    TransformToStep     ( fStep,      N_BUFFER, fStepAmplitude  );
+    TransformToImpulse  ( pImpulseX,   N_BUFFER                     );
+    TransformToStep     ( pStepX,      N_BUFFER,    stepAmplitude   );
 
     /*********************************IMPULSE*****************************************/
 
     CalculateResponse_IIR(
-        fBuffer, fImpulseX, N_BUFFER,
-        fCoefficientsX, iN_CoefficientsX,
-        fCoefficientsY, iN_CoefficientsY
+        pBuffer, pImpulseX, N_BUFFER,
+        pFeedforwardCoefficients,       N_FeedforwardCoefficients,
+        pFeedbackCoefficients,          N_FeedbackCoefficients
     );
 
-    WritedoubleArrayToFile(fBuffer, N_BUFFER, szOutputFileName_ImpulseResponse);
+    WriteArrayToFile(pBuffer, N_BUFFER, outputFileName_ImpulseResponse);
 
     /**********************************STEP*******************************************/
 
-    InitializeToZero(fBuffer, N_BUFFER);
+    InitializeToZero(pBuffer, N_BUFFER);
     CalculateResponse_IIR(
-        fBuffer, fStep, N_BUFFER,
-        fCoefficientsX, iN_CoefficientsX,
-        fCoefficientsY, iN_CoefficientsY
+        pBuffer, pStepX, N_BUFFER,
+        pFeedforwardCoefficients,   N_FeedforwardCoefficients,
+        pFeedbackCoefficients,      N_FeedbackCoefficients
     );
 
-    WritedoubleArrayToFile(fBuffer, N_BUFFER, szOutputFileName_StepResponse);
+    WriteArrayToFile(pBuffer, N_BUFFER, outputFileName_StepResponse);
 
     return 0;
     

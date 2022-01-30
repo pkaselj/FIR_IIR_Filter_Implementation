@@ -1,5 +1,5 @@
-const int iN_CoefficientsH = 145;
-const double fCoefficientsH[] =
+const int N_ImpulseResponseCoefficients = 145;
+const double pImpulseResponseCoefficients[] =
 {
 	-0.000919,
 	-0.005380,

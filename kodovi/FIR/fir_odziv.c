@@ -5,63 +5,63 @@
 
 #include "common\common.h"
 
-extern const int iN_CoefficientsH;
-extern const double fCoefficientsH[];
+extern const int    N_ImpulseResponseCoefficients;
+extern const double pImpulseResponseCoefficients[];
 
 CalculateResponse_FIR(
-    OUT      double fResultBuffer[],
-    IN const double fX[],
-    IN const int    iNX,
-    IN const double fH[],
-    IN const int    iNH
+    OUT      double pResultBuffer[],
+    IN const double pInputBuffer[],
+    IN const int    N_InputBuffer,
+    IN const double pImpulseResponse[],
+    IN const int    N_ImpulseResponse
 )
 {
-    const int N = iNX + iNH - 1;
+    const int N = N_InputBuffer + N_ImpulseResponse - 1;
 
     int n;
     for (n = 0; n < N; n++) {
 
-        const int kmin = (n > iNX - 1) ? n - (iNX - 1) : 0;
-        const int kmax = (n < iNH - 1) ? n : iNH - 1;
+        const int kmin = (n > N_InputBuffer - 1)     ? n - (N_InputBuffer - 1) : 0;
+        const int kmax = (n < N_ImpulseResponse - 1) ? n                       : N_ImpulseResponse - 1;
 
         for (int k = kmin; k <= kmax; k++) {
-            fResultBuffer[n] += fH[k] * fX[n - k];
+            pResultBuffer[n] += pImpulseResponse[k] * pInputBuffer[n - k];
         }
     }
 }
 
 int main(void)
 {
-    const char szOutputFileName_ImpulseResponse[] = "rezultati\\FIR_ImpulseResponse.txt";
-    const char szOutputFileName_StepResponse[] = "rezultati\\FIR_StepResponse.txt";
+    const char outputFileName_ImpulseResponse[] = "rezultati\\FIR_ImpulseResponse.txt";
+    const char outputFileName_StepResponse[]    = "rezultati\\FIR_StepResponse.txt";
 
-    double fImpulseX[N_BUFFER] = { 0 };
-    double fStep[N_BUFFER] = { 0 };
-    double fBuffer[N_BUFFER] = { 0 };
+    double pImpulseX[N_BUFFER] = { 0 };
+    double pStepX[N_BUFFER] = { 0 };
+    double pBuffer[N_BUFFER] = { 0 };
 
-    const double fStepAmplitude = 1.0f;
+    const double stepAmplitude = 1.0f;
 
-    TransformToImpulse(fImpulseX, N_BUFFER);
-    TransformToStep(fStep, N_BUFFER, fStepAmplitude);
+    TransformToImpulse(pImpulseX,    N_BUFFER                    );
+    TransformToStep   (pStepX,       N_BUFFER,   stepAmplitude   );
 
     /*********************************IMPULSE*****************************************/
 
     CalculateResponse_FIR(
-        fBuffer, fImpulseX, N_BUFFER,
-        fCoefficientsH, iN_CoefficientsH
+        pBuffer, pImpulseX, N_BUFFER,
+        pImpulseResponseCoefficients, N_ImpulseResponseCoefficients
     );
 
-    WritedoubleArrayToFile(fBuffer, N_BUFFER, szOutputFileName_ImpulseResponse);
+    WriteArrayToFile(pBuffer, N_BUFFER, outputFileName_ImpulseResponse);
 
     /**********************************STEP*******************************************/
 
-    InitializeToZero(fBuffer, N_BUFFER);
+    InitializeToZero(pBuffer, N_BUFFER);
     CalculateResponse_FIR(
-        fBuffer, fStep, N_BUFFER,
-        fCoefficientsH, iN_CoefficientsH
+        pBuffer, pStepX, N_BUFFER,
+        pImpulseResponseCoefficients, N_ImpulseResponseCoefficients
     );
 
-    WritedoubleArrayToFile(fBuffer, N_BUFFER, szOutputFileName_StepResponse);
+    WriteArrayToFile(pBuffer, N_BUFFER, outputFileName_StepResponse);
 
     return 0;
 

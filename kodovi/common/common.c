@@ -1,43 +1,44 @@
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 
-void InitializeToZero(double* array, int N)
+void InitializeToZero(double pArray[], int N)
 {
-    memset(array, 0, N);
+    memset(pArray, 0, N);
 }
 
-void TransformToStep(double* array, int N, double fAmplitude)
+void TransformToStep(double pArray[], int N, double fAmplitude)
 {
     int i;
     for (i = 0; i < N; i++)
     {
-        array[i] = fAmplitude;
+        pArray[i] = fAmplitude;
     }
 }
 
-void TransformToImpulse(double* array, int N)
+void TransformToImpulse(double pArray[], int N)
 {
-    memset(array, 0, N);
-    array[0] = 1;
+    memset(pArray, 0, N);
+    pArray[0] = 1;
 }
 
-void WritedoubleArrayToFile(double* array, int N, const char szFileName[])
+void WriteArrayToFile(double pArray[], int N, const char szFileName[])
 {
     FILE* hFile = NULL;
-    fopen_s(&hFile, szFileName, "w");
+    errno_t error = fopen_s(&hFile, szFileName, "w");
 
-    if (!hFile)
+    if (error || !hFile)
     {
         exit(-1);
         return;
     }
 
-    const int iElementsPerLine = 1;
+    const int N_ElementsPerLine = 1;
     int i;
     for (i = 0; i < N; i++)
     {
-        fprintf_s(hFile, "%lf, ", array[i]);
-        if (i % iElementsPerLine == 0)
+        fprintf_s(hFile, "%lf, ", pArray[i]);
+        if (i % N_ElementsPerLine == 0)
         {
             fprintf_s(hFile, "\n");
         }
